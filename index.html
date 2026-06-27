@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quantum Flux Test App</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="cards.css" />
+  </head>
+  <body>
+    <section id="intro-screen" class="intro-screen">
+      <div class="intro-media" aria-hidden="true"></div>
+      <div class="intro-panel">
+        <div class="intro-copy">
+          <span class="eyebrow">Quantum Flux</span>
+          <h1>Control Probability. Master the Impossible.</h1>
+          <p>
+            In the distant future, humanity has learned not only to observe quantum reality but to shape it.
+            At the heart of this revolution lies the Quantum Flux, an unstable apparatus capable of generating
+            qubits, twisting superpositions, forging entanglement chains, and triggering high-energy collapse events.
+          </p>
+          <p>
+            Every observation increases Decoherence, a global force that slowly unravels the fabric of the universe.
+            Every attempt to push the forge further raises personal Instability, risking catastrophic loss of control.
+            Shape the shared Quantum Field, manage the storm, and control reality before it falls apart.
+          </p>
+        </div>
+        <form id="intro-form" class="intro-form">
+          <div class="intro-setup-row">
+            <label class="intro-field">
+              <span>Players</span>
+              <select id="player-count">
+                <option value="2">2 players</option>
+                <option value="3">3 players</option>
+                <option value="4" selected>4 players</option>
+              </select>
+            </label>
+            <label class="intro-field">
+              <span>Mode</span>
+              <select id="game-mode">
+                <option value="normal" selected>Normal</option>
+                <option value="flux">Flux</option>
+              </select>
+            </label>
+          </div>
+          <div id="player-name-fields" class="player-name-fields"></div>
+          <div class="intro-actions">
+            <button class="start-game-button" type="submit">Start</button>
+            <button id="tutorial-start-button" class="tutorial-start-button" type="button">Tutorial</button>
+            <button id="intro-rulebook-button" class="test-deck-button" type="button">Rulebook</button>
+            <button id="intro-music-button" class="audio-toggle-button" type="button">Music Off</button>
+            <button id="intro-sfx-button" class="audio-toggle-button active" type="button">SFX On</button>
+            <button id="deck-test-button" class="test-deck-button" type="button">⚙ Test Deck</button>
+            <button id="intro-exit-button" class="exit-game-button" type="button">Exit</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <dialog id="deck-test-dialog" class="deck-test-dialog">
+      <div class="card-library-header">
+        <h2>Test Deck</h2>
+        <button id="deck-test-close" class="icon-button" type="button" title="Close">×</button>
+      </div>
+      <div class="deck-test-options">
+        <label class="deck-test-start-field"><span>QP Start:</span><input id="deck-test-start" type="number" value="0" min="-20" max="99" /></label>
+        <label class="deck-test-start-field"><span>Qubits:</span><input id="deck-test-qubits" type="number" value="0" min="0" max="35" /></label>
+        <label><input type="checkbox" data-deck-type="protocol" checked /> Protocols</label>
+        <label><input type="checkbox" data-deck-type="circuit" checked /> Circuits</label>
+        <label><input type="checkbox" data-deck-type="stabilizer" checked /> Stabilizators</label>
+        <label><input type="checkbox" data-deck-type="state" checked /> States</label>
+      </div>
+      <button id="deck-test-apply" class="deck-test-apply" type="button">Apply</button>
+    </dialog>
+
+    <dialog id="rulebook-dialog" class="rulebook-dialog">
+      <div class="card-library-header">
+        <div>
+          <span class="eyebrow">Quantum Flux</span>
+          <h2>Rulebook & Play Guide</h2>
+        </div>
+        <button id="rulebook-close" class="icon-button" type="button" title="Close">×</button>
+      </div>
+      <article class="rulebook-content">
+        <section class="rulebook-hero">
+          <div class="rulebook-cover" aria-hidden="true"></div>
+          <div>
+            <h3>How To Use This Guide</h3>
+            <p>
+              This guide explains the current prototype rules and uses live visual examples from the app:
+              dice faces, card templates, board regions, pools, tile colors, and scoring examples.
+            </p>
+            <p>
+              The Card Library and Dice Library are still the detailed references. This rulebook is the
+              guided play explanation.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h3>Goal</h3>
+          <p>Operate an unstable quantum reactor, shape the shared Quantum Field, and finish with the highest Quantum Potential (⬢).</p>
+          <p>The game ends when Decoherence reaches the final space. Finish the current round, then resolve final scoring.</p>
+        </section>
+
+        <section>
+          <h3>Screen Guide</h3>
+          <div class="rulebook-screen-map" aria-label="Quantum Flux screen layout guide">
+            <div class="screen-map-top">Player order, resources, libraries, Rulebook</div>
+            <div class="screen-map-board">Main Quantum Field<br /><span>Apex, Decoherence, QP track, hex map</span></div>
+            <div class="screen-map-player">Active Operator Board<br /><span>Hand, dice, collapse pool, cards, instability</span></div>
+          </div>
+        </section>
+
+        <section>
+          <h3>Resources</h3>
+          <ul>
+            <li><strong>Quantum Potential (⬢):</strong> victory points and the cost for Stabilizer cards.</li>
+            <li><strong>Qubits (◈):</strong> resource used to play Protocol, Circuit, and State cards.</li>
+            <li><strong>Instability (⧖):</strong> personal risk. Continuing usually increases it.</li>
+            <li><strong>Decoherence (Δ):</strong> global timer and event track.</li>
+            <li><strong>Apex (✦):</strong> title held by the player with the highest positive Collapse Value record.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Setup</h3>
+          <ol>
+            <li>Choose 2 to 4 players and enter names.</li>
+            <li>Each player starts with 0 qubits unless a test value is selected.</li>
+            <li>Each player receives random cards in hand and face-down starting Stabilizers.</li>
+            <li>Player markers begin on the Quantum Potential track in player order.</li>
+            <li>Apex markers begin on the red spaces before the Apex 0 space.</li>
+          </ol>
+        </section>
+
+        <section class="beginner-tutorial">
+          <h3>Beginner Tutorial</h3>
+          <p>
+            Use this tutorial for a first learning game. Do not worry about advanced card timing yet:
+            first learn how dice move, how Collapse Value creates a tile, and how the field gives QP.
+          </p>
+
+          <div class="tutorial-flow">
+            <span>Roll</span>
+            <span>Use Actions</span>
+            <span>Collapse</span>
+            <span>Place Tile</span>
+            <span>End Turn</span>
+          </div>
+
+          <div class="tutorial-steps">
+            <article>
+              <h4>1. Start With The Active Player</h4>
+              <p>
+                Look at the highlighted player tab in the top banner. That player is the active operator.
+                Their hand, dice, qubits, instability, and card slots are shown on the right.
+              </p>
+              <div class="tutorial-callout">Beginner focus: ignore cards on the first turn unless one is glowing and you want to inspect it.</div>
+            </article>
+
+            <article>
+              <h4>2. Press Roll</h4>
+              <p>
+                Press the arrow button between the pools. On the first press it says Roll. Qubit dice immediately
+                add qubits, Δ dice advance Decoherence, and Ψ/outcome dice move to the Collapse Pool.
+              </p>
+              <div class="tutorial-pool-demo">
+                <div><strong>Dice Pool</strong><span class="example-die action">Φ</span><span class="example-die action">⊗</span><span class="example-die action">◈</span></div>
+                <div><strong>Collapse Pool</strong><span class="example-die psi">Ψ</span><span class="example-die outcome">3</span></div>
+              </div>
+            </article>
+
+            <article>
+              <h4>3. Use Only Highlighted Actions</h4>
+              <p>
+                Action dice glow only when they have legal targets. Click a glowing action die, then click the
+                highlighted dice in the Collapse Pool. The action moves into the Collapse Pool and creates a blue group frame.
+              </p>
+              <div class="tutorial-callout">
+                Example: ⊗ needs two free Ψ dice. Φ needs one free Ψ die. ⊘ needs one free outcome.
+              </div>
+            </article>
+
+            <article>
+              <h4>4. Decide: Continue Or Collapse</h4>
+              <p>
+                If dice remain in the Dice Pool, pressing the same arrow again Continues: those dice reroll and
+                Instability usually increases by +1⧖. If you like the Collapse Pool, press Collapse.
+              </p>
+              <p>
+                A safe beginner habit is: Collapse as soon as you have 2 or 3 useful dice in the Collapse Pool.
+                Continue only when you understand what you are trying to improve.
+              </p>
+            </article>
+
+            <article>
+              <h4>5. Resolve The Collapse</h4>
+              <p>
+                After Collapse, every Ψ gets a random green value. Outcomes show red values. If a group shows
+                choices above it, click one choice. When all choices are made, the app shows CV and the tile color.
+              </p>
+              <div class="tutorial-callout">
+                Green values add. Red values subtract. Matching green values or matching red values cause Fail, which places a black tile.
+              </div>
+            </article>
+
+            <article>
+              <h4>6. Place The Tile</h4>
+              <p>
+                Click a legal hex. On the first turn this is around the center white hex. Later it is around your
+                Vector. The tile color comes from CV, but QP comes from the field scoring rule.
+              </p>
+              <div class="tutorial-mini-board" aria-hidden="true">
+                <span class="guide-hex tile-white">Center</span>
+                <span class="guide-hex tile-green">Legal</span>
+                <span class="guide-hex tile-green">Legal</span>
+                <span class="guide-hex tile-green">Legal</span>
+              </div>
+            </article>
+
+            <article>
+              <h4>7. Read The Field Score</h4>
+              <p>
+                Before placing, think: how many neighboring scoring tiles will this new tile touch?
+                Green, orange, red, and violet neighbors count. White and black do not.
+              </p>
+              <div class="tutorial-callout">
+                Beginner example: a green tile beside two scoring neighbors gives 1 + 1 + 1 = 3⬢.
+              </div>
+            </article>
+
+            <article>
+              <h4>8. End Turn</h4>
+              <p>
+                After placing or moving your Vector, END TURN appears. Press it when finished. Later, this is also
+                the timing window for after-placement cards and effects.
+              </p>
+            </article>
+          </div>
+
+          <div class="tutorial-do-dont">
+            <div>
+              <h4>Beginner Priorities</h4>
+              <ul>
+                <li>Get qubits early so you can play cards.</li>
+                <li>Place green and orange tiles near scoring neighbors.</li>
+                <li>Watch duplicate collapse values because they cause Fail.</li>
+                <li>Use Continue carefully; Instability is powerful but dangerous.</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Common First Mistakes</h4>
+              <ul>
+                <li>Scoring CV directly as QP. QP usually comes from tile field scoring.</li>
+                <li>Trying to place anywhere after the first turn. Use your Vector neighborhood.</li>
+                <li>Forgetting red outcome values subtract from CV.</li>
+                <li>Ignoring the Decoherence events that affect all players.</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h3>Turn Structure</h3>
+          <ol>
+            <li><strong>Roll:</strong> press Roll. Qubits resolve automatically, Δ advances Decoherence, and Ψ/outcomes move to the Collapse Pool.</li>
+            <li><strong>Actions:</strong> click legal action dice in the Dice Pool and choose highlighted targets in the Collapse Pool.</li>
+            <li><strong>Continue or Collapse:</strong> Continue rerolls remaining Dice Pool dice and usually adds +1⧖. Collapse resolves the pool.</li>
+            <li><strong>Resolve Collapse:</strong> assign values, choose group results, calculate CV, check failure, and update Apex.</li>
+            <li><strong>Place Tile:</strong> choose a legal hex around the Vector and score the field effect.</li>
+            <li><strong>End Turn:</strong> play legal after-placement cards if desired, then press END TURN.</li>
+          </ol>
+        </section>
+
+        <section>
+          <h3>Detailed Turn Walkthrough</h3>
+          <h4>1. Before Roll</h4>
+          <p>Check the active player banner, qubits, QP, Instability, Apex status, hand cards, and tucked cards. Circuit cards may be played before Roll when legal.</p>
+          <h4>2. Roll Phase</h4>
+          <p>Press Roll. Qubit faces immediately add qubits and become disabled. Delta faces advance Decoherence. Superposition and Outcome faces move to the Collapse Pool. Action faces remain in the Dice Pool.</p>
+          <h4>3. Action Phase</h4>
+          <p>Only dice with legal targets glow. Click an action die, then click highlighted targets in the Collapse Pool. Modifiers use one target. Relations use two or more targets. The action die moves into the Collapse Pool and forms a blue group frame.</p>
+          <h4>4. Continue Or Collapse</h4>
+          <p>If dice remain in the Dice Pool, the arrow becomes Continue. Continue rerolls remaining dice and usually adds +1 Instability. Collapse is available when at least one die is in the Collapse Pool.</p>
+          <h4>5. Collapse Resolution</h4>
+          <p>Each superposition receives a random value from 0 to 5. Outcomes show red values. For each group, choose one displayed result. Then the app calculates CV, Fail status, Annihilation pairs, Full Collapse bonus, tile color, and legal placement.</p>
+          <h4>6. Tile Placement</h4>
+          <p>Click one legal hex. First placement is around the center. Later placements must be around the player's Vector unless a card changes this. The tile may enter a free hex, replace a legal own tile, or conquer a legal enemy tile.</p>
+          <h4>7. After Placement</h4>
+          <p>The tile scores QP, applies first-placement bonuses, influences neighboring colored tiles, moves the Vector, and may trigger Stabilizers or Protocols. After-placement cards may be played before END TURN.</p>
+        </section>
+
+        <section>
+          <h3>Game Modes</h3>
+          <p><strong>Normal:</strong> all enabled cards form one shared deck.</p>
+          <p><strong>Flux:</strong> each player receives 5 face-down Stabilizers, then a personal 15-card deck made from 5 Protocols, 5 Circuits, and 5 States. Each player shuffles that personal deck and draws 3 starting cards. Remaining cards form the general deck.</p>
+          <p>In Flux, blue Decoherence Delta and card thresholds fire only once, then turn gray. Decoherence card thresholds draw 3 cards from each player's personal deck. Apex and card-effect draw symbols use the general deck.</p>
+        </section>
+
+        <section>
+          <h3>Card Timing Windows</h3>
+          <ul>
+            <li><strong>Before Roll:</strong> Circuits may be played to upgrade dice before rolling.</li>
+            <li><strong>Action Phase:</strong> Protocols may add temporary dice, reroll dice, set values, or prepare collapse effects.</li>
+            <li><strong>Before/During Collapse:</strong> some Protocols and Stabilizers modify values, groups, or dice before CV is finalized.</li>
+            <li><strong>After Collapse:</strong> cards may modify CV, group values, Apex, or placement before a tile is placed.</li>
+            <li><strong>After Tile Placement:</strong> cards and Stabilizers may score, move Vector, alter tile color, or trigger turn-end effects before END TURN.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Dice</h3>
+          <div id="rulebook-dice-strip" class="rulebook-dice-strip"></div>
+          <ul>
+            <li><strong>Ψ:</strong> Superposition. During Collapse it receives a random value from 0 to 5.</li>
+            <li><strong>0-5:</strong> Outcome. Counts as a red value during Collapse.</li>
+            <li><strong>◈:</strong> Qubit. Gained automatically when rolled.</li>
+            <li><strong>Δ:</strong> Decoherence. Advances the Decoherence Track unless ignored by an effect.</li>
+            <li><strong>Actions:</strong> attach to free Ψ and/or Outcome dice and form groups.</li>
+          </ul>
+          <p>Use the Dice Library for every face, hover formula, target type, and activation rule.</p>
+        </section>
+
+        <section>
+          <h3>Starting Actions</h3>
+          <div class="rulebook-grid">
+            <span>⊗ Entangle</span><span>Choose 2 free Ψ. Score twice one selected Ψ value.</span>
+            <span>⇄ Resonate</span><span>Choose 2 free Ψ. Score their sum or absolute difference.</span>
+            <span>↯ Tunneling</span><span>Choose 1 free Ψ and 1 free Outcome. Green is max, red is min.</span>
+            <span>⧓ Bind</span><span>Choose 1 free Ψ and 1 free Outcome. Green copies the Outcome, red becomes 0.</span>
+            <span>≡ Synchronize</span><span>Choose 2 free Outcomes. Score the smaller red value.</span>
+            <span>⇌ Interfere</span><span>Choose 2 free Outcomes. Score their absolute difference as red.</span>
+            <span>Φ Shift</span><span>Choose 1 free Ψ. Score N-1, N, or N+1.</span>
+            <span>Ψ* Conjugate</span><span>Choose 1 free Ψ. Score N or 5-N.</span>
+            <span>≈ Rephase</span><span>Choose 1 free Outcome. Score N or 5-N.</span>
+            <span>⊘ Nullify</span><span>Choose 1 free Outcome. Score 0.</span>
+          </div>
+        </section>
+
+        <section>
+          <h3>Collapse</h3>
+          <div class="rulebook-collapse-example">
+            <div class="collapse-example-row">
+              <span class="example-die psi">Ψ<small>3</small></span>
+              <span class="example-die action">⊗</span>
+              <span class="example-die psi">Ψ<small>4</small></span>
+              <span class="example-choice">choose 6 or 8</span>
+            </div>
+            <div class="collapse-example-row">
+              <span class="example-die outcome">2</span>
+              <span class="example-die action">⊘</span>
+              <span class="example-choice">choose 0</span>
+            </div>
+            <p>Groups replace their dice values with the selected group result before total CV is calculated.</p>
+          </div>
+          <p>Green values add to CV. Red values subtract from CV. Group values replace the dice values inside that group.</p>
+          <p>If two or more green values match, or two or more red values match, the collapse fails. The tile becomes black.</p>
+          <p>If all six dice are in the Collapse Pool and the collapse does not fail, gain the Full Collapse bonus: +2⬢.</p>
+        </section>
+
+        <section>
+          <h3>Apex</h3>
+          <p>The first positive CV takes Apex. Later, a player takes Apex only by exceeding the current Apex value.</p>
+          <p>Positive CV moves the player's marker onto the Apex Track. Failed or negative collapses place the marker on the red spaces before 0. Passing blue ⧉ icons draws cards.</p>
+          <p>Player order is recalculated after each round from highest Apex position to lowest.</p>
+        </section>
+
+        <section>
+          <h3>Tile Placement</h3>
+          <div class="rulebook-tile-strip">
+            <span class="guide-hex tile-black">Fail</span>
+            <span class="guide-hex tile-violet">-CV</span>
+            <span class="guide-hex tile-white">0</span>
+            <span class="guide-hex tile-green">1-5</span>
+            <span class="guide-hex tile-orange">6-10</span>
+            <span class="guide-hex tile-red">11+</span>
+          </div>
+          <p>The first Vector placement may be on a free hex around the central white hex. After that, legal placements come from the Vector neighborhood.</p>
+          <ul>
+            <li><strong>Free hex:</strong> place the tile generated by CV.</li>
+            <li><strong>Own tile:</strong> may replace only if old CV is higher than current CV.</li>
+            <li><strong>Enemy tile:</strong> may conquer only if old CV is lower than current CV, unless protected.</li>
+            <li><strong>Black tile:</strong> can be moved onto, but black placement prefers legal free or own tiles first.</li>
+          </ul>
+          <div class="rulebook-grid compact">
+            <span>Failed</span><span>Black tile</span>
+            <span>CV &lt; 0</span><span>Violet tile</span>
+            <span>CV = 0</span><span>White tile</span>
+            <span>0 &lt; CV ≤ 5</span><span>Green tile</span>
+            <span>5 &lt; CV ≤ 10</span><span>Orange tile</span>
+            <span>CV ≥ 11</span><span>Red tile</span>
+          </div>
+        </section>
+
+        <section>
+          <h3>Field Scoring</h3>
+          <div class="rulebook-field-example">
+            <div class="field-example-center guide-hex tile-orange">+2</div>
+            <div class="field-example-neighbors">
+              <span class="guide-hex tile-green">+1</span>
+              <span class="guide-hex tile-red">+3</span>
+              <span class="guide-hex tile-white">0</span>
+              <span class="guide-hex tile-black">0</span>
+            </div>
+            <p>Example: placing orange beside green and red scoring neighbors gives 2 + 2 + 2 = +6⬢. White and black neighbors do not count.</p>
+          </div>
+          <p>QP is scored from the tile placed or reactivated, not directly from CV. Count neighboring scoring tiles only: violet, green, orange, and red. White and black neighbors do not count.</p>
+          <div class="rulebook-grid compact">
+            <span>Black</span><span>-2⬢ plus -2⬢ per scoring neighbor.</span>
+            <span>Violet</span><span>-1⬢ plus -1⬢ per scoring neighbor.</span>
+            <span>White</span><span>0⬢.</span>
+            <span>Green</span><span>+1⬢ plus +1⬢ per scoring neighbor.</span>
+            <span>Orange</span><span>+2⬢ plus +2⬢ per scoring neighbor.</span>
+            <span>Red</span><span>+3⬢ plus +3⬢ per scoring neighbor.</span>
+          </div>
+          <p>Replacing your own tile compares old field value to new field value and you lose the difference. Conquering compares new value to old value; the conqueror gains the difference and the defeated player resolves the old value.</p>
+        </section>
+
+        <section>
+          <h3>Influence</h3>
+          <p>After placement, the new tile influences surrounding colored tiles. Black and white tiles have no CV number and are not adjusted. Influence cannot cross zero; a tile that reaches zero becomes white.</p>
+          <div class="rulebook-grid compact">
+            <span>Black</span><span>-2 to neighboring colored CV.</span>
+            <span>Violet</span><span>-1 to neighboring colored CV.</span>
+            <span>Green</span><span>+1 to neighboring colored CV.</span>
+            <span>Orange</span><span>+2 to neighboring colored CV.</span>
+            <span>Red</span><span>+3 to neighboring colored CV.</span>
+          </div>
+        </section>
+
+        <section>
+          <h3>Decoherence</h3>
+          <p>When Δ advances onto an event space, resolve that event for all players in player order.</p>
+          <ul>
+            <li><strong>Δ swap:</strong> replace one legal action or qubit face with Δ.</li>
+            <li><strong>⧉:</strong> draw 1 card.</li>
+            <li><strong>-⬢:</strong> lose the listed QP.</li>
+            <li><strong>+⧖:</strong> gain 1 Instability.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Instability</h3>
+          <ul>
+            <li>At 1-7, if CV is negative, gain +1⧖.</li>
+            <li>At 8-15, if CV is positive, reduce Instability by 1.</li>
+            <li>At 16-25, if CV is positive, reduce Instability by 2.</li>
+            <li>If Instability would move past the final spot, lose 1⬢ for each extra push.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>Cards</h3>
+          <div id="rulebook-card-strip" class="rulebook-card-strip"></div>
+          <ul>
+            <li><strong>Protocols:</strong> require minimum QP and qubits. They give quick effects, may give Apex bonuses, and tuck as coherence symbols ⬡.</li>
+            <li><strong>Circuits:</strong> played before Roll or after Collapse. They upgrade dice faces and tuck by collection symbol.</li>
+            <li><strong>States:</strong> played after their condition, or Apex condition if you hold Apex, and only at legal Decoherence colors. They tuck as coherence converters.</li>
+            <li><strong>Stabilizers:</strong> cost QP, enter Stabilizer slots, give permanent effects while unlocked, and lock when Instability is above their slot.</li>
+          </ul>
+          <p>Requantize and Decohere discard a card for its listed resource effect instead of playing it.</p>
+        </section>
+
+        <section>
+          <h3>Stabilizers</h3>
+          <p>Stabilizers lock when the Instability marker is above their slot. Locked Stabilizers hide permanent and end-game text, show only the lock effect, and immediately resolve that lock effect. If Instability later moves away, the Stabilizer unlocks.</p>
+        </section>
+
+        <section>
+          <h3>End Game Scoring</h3>
+          <ul>
+            <li><strong>Presence:</strong> score the final Quantum Field by tile ownership and color.</li>
+            <li><strong>Coherence:</strong> Protocol ⬡ symbols are converted by tucked State cards.</li>
+            <li><strong>Resonance:</strong> Circuit symbols are converted by unlocked Stabilizers.</li>
+            <li><strong>Qubits:</strong> 0-4 = 0⬢, 5-14 = +1⬢, 15-24 = +3⬢, 25-35 = +5⬢.</li>
+            <li><strong>Instability:</strong> after end-game reductions, score 1-3 = +5⬢, 4-7 = +3⬢, 8-12 = +1⬢, 13-18 = 0⬢, 19-25 = -1⬢, 26 = -3⬢.</li>
+          </ul>
+        </section>
+      </article>
+    </dialog>
+
+    <div id="app-shell" class="app-shell hidden">
+      <section id="tutorial-coach" class="tutorial-coach hidden" aria-live="polite">
+        <div class="tutorial-coach-header">
+          <span id="tutorial-progress" class="eyebrow">Tutorial</span>
+          <button id="tutorial-close-button" class="icon-button" type="button" title="Exit tutorial">×</button>
+        </div>
+        <h2 id="tutorial-title">Tutorial</h2>
+        <p id="tutorial-text"></p>
+        <div class="tutorial-coach-actions">
+          <button id="tutorial-prev-button" type="button">Back</button>
+          <button id="tutorial-next-button" type="button">Next</button>
+        </div>
+      </section>
+
+      <header class="top-bar">
+        <div class="brand-block">
+          <span class="eyebrow">Quantum Flux</span>
+          <strong id="current-player-label">Current Player</strong>
+        </div>
+        <div id="player-summary" class="player-summary"></div>
+        <div class="top-stats">
+          <span>Decoherence <strong id="top-decoherence">1</strong></span>
+          <span>Apex <strong id="top-apex">None</strong></span>
+        </div>
+        <button id="music-button" class="icon-button audio-icon-button" type="button" title="Music">♪</button>
+        <button id="sfx-button" class="icon-button audio-icon-button active" type="button" title="Sound effects">SFX</button>
+        <button id="rulebook-button" class="icon-button" type="button" title="Rulebook">?</button>
+        <button id="dice-library-button" class="icon-button" type="button" title="Dice library">⚅</button>
+        <button id="card-library-button" class="icon-button" type="button" title="Card library">☷</button>
+        <button id="app-exit-button" class="icon-button app-exit-button" type="button" title="Exit game">×</button>
+      </header>
+
+      <main class="board-stage">
+        <section class="main-board" aria-label="Quantum Flux main board">
+          <div id="score-track" class="score-track"></div>
+          <div class="board-core">
+            <div class="tile-legend cv-legend">
+              <div><span class="legend-gem tile-black">⬢</span>: failed</div>
+              <div><span class="legend-gem tile-violet">⬢</span>: CV &lt; 0</div>
+              <div><span class="legend-gem tile-white">⬢</span>: CV = 0</div>
+              <div><span class="legend-gem tile-green">⬢</span>: 0&lt;CV ≤ 5</div>
+              <div><span class="legend-gem tile-orange">⬢</span>: 5 &lt; CV ≤ 10</div>
+              <div><span class="legend-gem tile-red">⬢</span>: CV ≥ 11</div>
+            </div>
+            <div class="tile-legend influence-legend">
+              <div><span class="legend-gem tile-black">⬢</span> → <span class="legend-targets"><span class="legend-gem tile-violet">⬢</span><span class="legend-gem tile-green">⬢</span><span class="legend-gem tile-orange">⬢</span><span class="legend-gem tile-red">⬢</span></span> -2</div>
+              <div><span class="legend-gem tile-violet">⬢</span> → <span class="legend-targets"><span class="legend-gem tile-violet">⬢</span><span class="legend-gem tile-green">⬢</span><span class="legend-gem tile-orange">⬢</span><span class="legend-gem tile-red">⬢</span></span> -1</div>
+              <div><span class="legend-gem tile-green">⬢</span> → <span class="legend-targets"><span class="legend-gem tile-violet">⬢</span><span class="legend-gem tile-green">⬢</span><span class="legend-gem tile-orange">⬢</span><span class="legend-gem tile-red">⬢</span></span> +1</div>
+              <div><span class="legend-gem tile-orange">⬢</span> → <span class="legend-targets"><span class="legend-gem tile-violet">⬢</span><span class="legend-gem tile-green">⬢</span><span class="legend-gem tile-orange">⬢</span><span class="legend-gem tile-red">⬢</span></span> +2</div>
+              <div><span class="legend-gem tile-red">⬢</span> → <span class="legend-targets"><span class="legend-gem tile-violet">⬢</span><span class="legend-gem tile-green">⬢</span><span class="legend-gem tile-orange">⬢</span><span class="legend-gem tile-red">⬢</span></span> +3</div>
+            </div>
+            <div id="apex-track" class="apex-track"></div>
+            <div id="hex-field" class="hex-field"></div>
+            <div id="decoherence-track" class="decoherence-track"></div>
+          </div>
+        </section>
+        <section class="action-log-panel" aria-label="Action log">
+          <div class="action-log-header">
+            <span class="eyebrow">Action Log</span>
+            <strong>Quantum Record</strong>
+          </div>
+          <div id="action-log" class="action-log"></div>
+        </section>
+      </main>
+
+      <aside class="player-panel">
+        <section class="active-header">
+          <span class="eyebrow">Active Operator</span>
+          <div class="active-info-row">
+            <strong id="active-player-name">Player</strong>
+            <span id="active-apex-mark" class="active-apex-mark"></span>
+            <strong id="active-potential" class="active-potential-inline">0⬢</strong>
+            <strong id="active-qubits" class="active-qubits-inline">0◈</strong>
+            <div id="decoherence-meter" class="decoherence-meter compact-meter"></div>
+            <button id="end-turn-button" class="end-turn-button hidden" type="button">END TURN</button>
+          </div>
+        </section>
+
+        <section>
+          <h2>Cards In Hand</h2>
+          <div id="hand-area" class="hand-area"></div>
+        </section>
+
+        <section class="reactor-board">
+          <div id="circuit-slots" class="edge-slots top-slots"></div>
+          <div id="state-slot" class="side-slot state-slot"><span>⦿</span></div>
+          <div id="protocol-slot" class="side-slot protocol-slot"><span>⟫</span></div>
+
+          <div class="qubit-counter">
+            <div id="qubit-track" class="small-track"></div>
+            <div class="qubit-scoring">
+              <span>0⬢</span>
+              <span>1⬢</span>
+              <span>3⬢</span>
+              <span>5⬢</span>
+            </div>
+          </div>
+
+          <div class="pool-grid">
+            <div class="pool collapse-pool">
+              <h3>▣Collapse Pool</h3>
+              <div id="collapse-actions" class="pool-command-row"></div>
+              <div id="collapse-pool" class="pool-items"></div>
+            </div>
+
+            <div class="pool-actions">
+              <button id="roll-continue-button" class="reroll-arrow" type="button" title="Roll dice, then continue by increasing instability"><span>Roll</span></button>
+              <button id="stabilize-button" class="stabilize-arrow" type="button" title="Pay five qubits to reduce instability"><span>5◈:-⧖</span></button>
+            </div>
+
+            <div class="pool dice-pool">
+              <h3>▢Dice Pool</h3>
+              <div class="dice-toolbar">
+                <div id="dice-icons" class="dice-icons"></div>
+              </div>
+              <div id="dice-pool" class="pool-items"></div>
+            </div>
+          </div>
+
+          <div class="instability-board">
+            <span id="active-instability-marker" class="active-instability-marker">⧖</span>
+            <div id="instability-bonuses" class="instability-bonuses"></div>
+            <div id="instability-scores" class="instability-scores"></div>
+            <div id="instability-track" class="instability-track"></div>
+            <div id="stabilizer-slots" class="edge-slots bottom-slots"></div>
+          </div>
+        </section>
+      </aside>
+
+      <dialog id="card-library-dialog" class="card-library-dialog">
+        <div class="card-library-header">
+          <h2>Card Library</h2>
+          <button id="card-library-close" class="icon-button" type="button" title="Close">×</button>
+        </div>
+        <div class="card-library-tabs" role="tablist" aria-label="Card types">
+          <button class="card-tab active" type="button" data-card-type="protocol">Protocols</button>
+          <button class="card-tab" type="button" data-card-type="circuit">Circuits</button>
+          <button class="card-tab" type="button" data-card-type="stabilizer">Stabilizers</button>
+          <button class="card-tab" type="button" data-card-type="state">States</button>
+        </div>
+        <div id="card-library-grid" class="card-library-grid"></div>
+      </dialog>
+
+      <dialog id="dice-library-dialog" class="dice-library-dialog">
+        <div class="card-library-header">
+          <h2>Dice Library</h2>
+          <button id="dice-library-close" class="icon-button" type="button" title="Close">×</button>
+        </div>
+        <div id="dice-library-grid" class="dice-library-grid"></div>
+      </dialog>
+
+      <dialog id="circuit-upgrade-dialog" class="delta-swap-dialog">
+        <div class="delta-swap-header">
+          <div>
+            <span class="eyebrow">Circuit Upgrade</span>
+            <h2 id="circuit-upgrade-title">Choose a die face</h2>
+          </div>
+          <button id="circuit-upgrade-close" class="icon-button" type="button" title="Cancel">×</button>
+        </div>
+        <p id="circuit-upgrade-copy">Choose one legal face to replace.</p>
+        <div id="circuit-upgrade-grid" class="delta-swap-grid"></div>
+      </dialog>
+
+      <dialog id="entropic-reset-dialog" class="delta-swap-dialog">
+        <div class="delta-swap-header">
+          <div>
+            <span class="eyebrow">Entropic Reset</span>
+            <h2 id="entropic-reset-title">Choose a new face</h2>
+          </div>
+        </div>
+        <p>Choose one of the other five faces for the selected die.</p>
+        <div id="entropic-reset-grid" class="delta-swap-grid"></div>
+      </dialog>
+
+      <dialog id="delta-swap-dialog" class="delta-swap-dialog">
+        <div class="delta-swap-header">
+          <div>
+            <span class="eyebrow">Decoherence Event</span>
+            <h2 id="delta-swap-title">Δ Face Swap</h2>
+          </div>
+          <strong id="delta-swap-count"></strong>
+        </div>
+        <p>Choose one face on any die to replace with Δ.</p>
+        <div id="delta-swap-grid" class="delta-swap-grid"></div>
+      </dialog>
+
+      <dialog id="hand-card-dialog" class="hand-card-dialog">
+        <button id="hand-card-close" class="icon-button hand-card-close" type="button" title="Close">×</button>
+        <div id="hand-card-zoom" class="hand-card-zoom"></div>
+        <div id="hand-card-actions" class="hand-card-actions"></div>
+      </dialog>
+
+      <dialog id="tucked-cards-dialog" class="card-library-dialog tucked-cards-dialog">
+        <div class="card-library-header">
+          <h2 id="tucked-cards-title">Tucked Cards</h2>
+          <button id="tucked-cards-close" class="icon-button" type="button" title="Close">×</button>
+        </div>
+        <div id="tucked-cards-grid" class="card-library-grid"></div>
+      </dialog>
+
+      <dialog id="protocol-choice-dialog" class="protocol-choice-dialog">
+        <div class="delta-swap-header">
+          <div>
+            <span class="eyebrow">Protocol</span>
+            <h2 id="protocol-choice-title">Choose one:</h2>
+          </div>
+        </div>
+        <div id="protocol-choice-actions" class="protocol-choice-actions"></div>
+      </dialog>
+
+      <dialog id="scoring-dialog" class="scoring-dialog">
+        <div class="scoring-header">
+          <div>
+            <span class="eyebrow">Final Scoring</span>
+            <h2>Quantum Flux Ends</h2>
+          </div>
+        </div>
+        <div id="scoring-results" class="scoring-results"></div>
+        <button id="scoring-ok-button" class="scoring-ok-button" type="button">OK</button>
+      </dialog>
+    </div>
+
+    <script src="cards.js"></script>
+    <script src="card-renderer.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

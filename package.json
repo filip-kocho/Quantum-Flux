@@ -1,0 +1,35 @@
+{
+  "name": "quantum-flux",
+  "version": "0.1.0",
+  "description": "Quantum Flux board game testing app",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.quantumflux.game",
+    "productName": "Quantum Flux",
+    "files": [
+      "index.html",
+      "styles.css",
+      "cards.css",
+      "app.js",
+      "cards.js",
+      "card-renderer.js",
+      "main.js",
+      "preload.js",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": "portable",
+      "icon": "assets/app-icon.png",
+      "signAndEditExecutable": false
+    }
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  }
+}

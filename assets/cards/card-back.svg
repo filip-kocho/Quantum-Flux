@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 260">
+  <defs>
+    <radialGradient id="core" cx="50%" cy="47%" r="50%">
+      <stop offset="0" stop-color="#4a1a66"/>
+      <stop offset="0.45" stop-color="#1d1528"/>
+      <stop offset="1" stop-color="#0a1118"/>
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="180" height="260" rx="4" fill="#0b1119"/>
+  <rect x="7" y="7" width="166" height="246" rx="3" fill="url(#core)" stroke="#653050" stroke-width="2"/>
+  <g fill="none" stroke-width="1.4" opacity="0.9">
+    <path d="M10 38 H33 L50 22 H72" stroke="#45b64a"/>
+    <path d="M12 55 H45 L61 38 H86" stroke="#2b8f43"/>
+    <path d="M170 36 H145 L127 19 H105" stroke="#c46d32"/>
+    <path d="M167 58 H133 L116 41 H89" stroke="#ff8b38"/>
+    <path d="M10 214 H36 L54 235 H77" stroke="#d98038"/>
+    <path d="M170 208 H137 L116 235 H91" stroke="#2e87dc"/>
+    <path d="M170 228 H151 L132 249 H99" stroke="#2371c2"/>
+  </g>
+  <g fill="#0b1119" stroke-width="1.4">
+    <circle cx="17" cy="63" r="3" stroke="#48ba51"/>
+    <circle cx="48" cy="30" r="3" stroke="#48ba51"/>
+    <circle cx="131" cy="24" r="3" stroke="#d47c32"/>
+    <circle cx="164" cy="64" r="3" stroke="#d47c32"/>
+    <circle cx="36" cy="232" r="3" stroke="#d47c32"/>
+    <circle cx="137" cy="230" r="3" stroke="#2d83d8"/>
+  </g>
+  <g filter="url(#glow)">
+    <circle cx="90" cy="112" r="43" fill="none" stroke="#9a48ff" stroke-width="3"/>
+    <circle cx="90" cy="112" r="31" fill="none" stroke="#9a48ff" stroke-width="2"/>
+    <circle cx="90" cy="112" r="20" fill="none" stroke="#9a48ff" stroke-width="2"/>
+    <text x="90" y="127" text-anchor="middle" font-family="Georgia, serif" font-size="48" fill="#c58cff">Ψ</text>
+  </g>
+  <g fill="#8ba1b8" opacity="0.6">
+    <circle cx="44" cy="174" r="1.5"/>
+    <circle cx="52" cy="174" r="1.5"/>
+    <circle cx="60" cy="174" r="1.5"/>
+    <circle cx="68" cy="174" r="1.5"/>
+    <circle cx="76" cy="174" r="1.5"/>
+    <circle cx="84" cy="174" r="1.5"/>
+    <circle cx="92" cy="174" r="1.5"/>
+    <circle cx="100" cy="174" r="1.5"/>
+    <circle cx="108" cy="174" r="1.5"/>
+    <circle cx="116" cy="174" r="1.5"/>
+    <circle cx="124" cy="174" r="1.5"/>
+    <circle cx="132" cy="174" r="1.5"/>
+  </g>
+</svg>
