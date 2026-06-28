@@ -156,6 +156,107 @@ body.desktop-app .app-shell {
   gap: 10px;
 }
 
+.network-setup {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(123, 200, 255, 0.45);
+  border-radius: 8px;
+  background: rgba(6, 14, 25, 0.9);
+  box-shadow: inset 0 0 22px rgba(41, 147, 255, 0.08);
+}
+
+.network-setup-row,
+.network-join-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.network-panel {
+  display: grid;
+  gap: 10px;
+}
+
+.network-primary-button {
+  justify-self: start;
+  min-width: 154px;
+  padding: 10px 15px;
+  border-color: rgba(76, 255, 191, 0.72);
+  background: #10251f;
+  color: #a6ffdd;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.network-host-details {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.network-host-details > div:not(.network-player-list) {
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid #344b60;
+  border-radius: 6px;
+  background: #0c1420;
+}
+
+.network-host-details span,
+.network-status {
+  color: #91a6be;
+  font-size: 0.72rem;
+}
+
+.network-host-details strong {
+  color: #eaf5ff;
+  overflow-wrap: anywhere;
+}
+
+.network-player-list {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.network-player-list span {
+  padding: 5px 8px;
+  border: 1px solid #38566d;
+  border-radius: 5px;
+  background: #111d29;
+  color: #dcecff;
+}
+
+.network-status {
+  margin: 0;
+}
+
+.network-status.connected {
+  color: #8dffbd;
+}
+
+.network-status.error {
+  color: #ff9da2;
+}
+
+.network-game-status {
+  padding: 6px 9px;
+  border: 1px solid rgba(76, 255, 191, 0.55);
+  border-radius: 5px;
+  color: #a6ffdd;
+  font-size: 0.72rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.network-turn-locked .player-panel,
+.network-turn-locked .main-board {
+  cursor: not-allowed;
+}
+
 .start-game-button {
   justify-self: start;
   min-width: 170px;

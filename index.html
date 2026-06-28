@@ -28,6 +28,13 @@
         <form id="intro-form" class="intro-form">
           <div class="intro-setup-row">
             <label class="intro-field">
+              <span>Play Mode</span>
+              <select id="play-mode">
+                <option value="shared-screen" selected>Shared Screen</option>
+                <option value="shared-network">Shared Network</option>
+              </select>
+            </label>
+            <label class="intro-field">
               <span>Players</span>
               <select id="player-count">
                 <option value="2">2 players</option>
@@ -44,8 +51,41 @@
             </label>
           </div>
           <div id="player-name-fields" class="player-name-fields"></div>
+          <section id="network-setup" class="network-setup hidden" aria-label="Shared network setup">
+            <div class="network-setup-row">
+              <label class="intro-field">
+                <span>Network Role</span>
+                <select id="network-role">
+                  <option value="host" selected>Host Game</option>
+                  <option value="join">Join Game</option>
+                </select>
+              </label>
+              <label class="intro-field">
+                <span>Your Name</span>
+                <input id="network-player-name" type="text" value="Player" maxlength="16" />
+              </label>
+            </div>
+            <div id="network-host-panel" class="network-panel">
+              <button id="network-create-button" class="network-primary-button" type="button">Create Lobby</button>
+              <div id="network-host-details" class="network-host-details hidden">
+                <div><span>Address</span><strong id="network-host-address">-</strong></div>
+                <div><span>Room Code</span><strong id="network-room-code">-</strong></div>
+                <div><span>Players</span><strong id="network-player-total">1 / 4</strong></div>
+                <div id="network-player-list" class="network-player-list"></div>
+                <button id="network-start-button" class="start-game-button" type="button" disabled>Start Network Game</button>
+              </div>
+            </div>
+            <div id="network-join-panel" class="network-panel hidden">
+              <div class="network-join-fields">
+                <label class="intro-field"><span>Host Address</span><input id="network-address" type="text" placeholder="192.168.1.20:31415" /></label>
+                <label class="intro-field"><span>Room Code</span><input id="network-join-code" type="text" inputmode="numeric" maxlength="4" placeholder="0000" /></label>
+              </div>
+              <button id="network-join-button" class="network-primary-button" type="button">Join Lobby</button>
+              <p id="network-join-status" class="network-status">Enter the host address and room code.</p>
+            </div>
+          </section>
           <div class="intro-actions">
-            <button class="start-game-button" type="submit">Start</button>
+            <button id="shared-screen-start-button" class="start-game-button" type="submit">Start</button>
             <button id="tutorial-start-button" class="tutorial-start-button" type="button">Tutorial</button>
             <button id="intro-rulebook-button" class="test-deck-button" type="button">Rulebook</button>
             <button id="intro-music-button" class="audio-toggle-button" type="button">Music Off</button>
@@ -510,6 +550,7 @@
         <button id="dice-library-button" class="icon-button" type="button" title="Dice library">⚅</button>
         <button id="card-library-button" class="icon-button" type="button" title="Card library">☷</button>
         <button id="app-exit-button" class="icon-button app-exit-button" type="button" title="Exit game">×</button>
+        <span id="network-game-status" class="network-game-status hidden"></span>
       </header>
 
       <main class="board-stage">

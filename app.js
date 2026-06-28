@@ -156,6 +156,20 @@ const audioState = {
   musicNodes: []
 };
 
+const networkState = {
+  mode: "shared-screen",
+  role: null,
+  connected: false,
+  started: false,
+  localPlayerId: null,
+  peerId: null,
+  hostInfo: null,
+  peers: [],
+  peerAssignments: {},
+  applyingSnapshot: false,
+  syncTimer: null
+};
+
 const tutorialSteps = [
   {
     title: "Welcome To Quantum Flux",
@@ -1435,9 +1449,10 @@ function renderDecoherenceMeter() {
 function renderHand() {
   const hand = gameState.handsByPlayer[gameState.activePlayerId] || [];
   const player = activePlayer();
-  if (player?.bot) {
+  const hiddenNetworkHand = networkState.started && networkState.localPlayerId !== gameState.activePlayerId;
+  if (player?.bot || hiddenNetworkHand) {
     document.querySelector("#hand-area").innerHTML = hand
-      .map(() => '<div class="hand-card-shell bot-hand-card" title="Bot card hidden"><span class="hand-card-back"></span></div>')
+      .map(() => '<div class="hand-card-shell bot-hand-card" title="Hidden card"><span class="hand-card-back"></span></div>')
       .join("");
     return;
   }
@@ -4473,6 +4488,185 @@ function isPsiOrOutcome(die) {
   return isSuperpositionFaceId(die.rolledFaceId) || die.rolledFaceId === "outcome";
 }
 
+function renderPlayModeSetup() {
+  const sharedNetwork = document.querySelector("#play-mode")?.value === "shared-network";
+  networkState.mode = sharedNetwork ? "shared-network" : "shared-screen";
+  document.querySelector("#network-setup")?.classList.toggle("hidden", !sharedNetwork);
+  document.querySelector("#player-name-fields")?.classList.toggle("hidden", sharedNetwork);
+  document.querySelector("#shared-screen-start-button")?.classList.toggle("hidden", sharedNetwork);
+  document.querySelector("#player-count")?.closest("label")?.classList.toggle("hidden", sharedNetwork);
+  renderNetworkRoleSetup();
+}
+
+function renderNetworkRoleSetup() {
+  const host = document.querySelector("#network-role")?.value !== "join";
+  document.querySelector("#network-host-panel")?.classList.toggle("hidden", !host);
+  document.querySelector("#network-join-panel")?.classList.toggle("hidden", host);
+}
+
+function networkPlayerName() {
+  return document.querySelector("#network-player-name")?.value.trim().slice(0, 16) || "Player";
+}
+
+async function createNetworkLobby() {
+  if (!window.QuantumFluxDesktop?.hostNetworkGame) return;
+  setNetworkJoinStatus("Creating lobby...", "");
+  try {
+    const info = await window.QuantumFluxDesktop.hostNetworkGame({ name: networkPlayerName() });
+    networkState.mode = "shared-network";
+    networkState.role = "host";
+    networkState.connected = true;
+    networkState.hostInfo = info;
+    networkState.peers = [];
+    document.querySelector("#network-host-details").classList.remove("hidden");
+    document.querySelector("#network-host-address").textContent = `${info.addresses[0] || "127.0.0.1"}:${info.port}`;
+    document.querySelector("#network-room-code").textContent = info.roomCode;
+    renderNetworkLobbyPlayers();
+  } catch (error) {
+    setNetworkJoinStatus(error.message || "Could not create lobby.", "error");
+  }
+}
+
+async function joinNetworkLobby() {
+  if (!window.QuantumFluxDesktop?.joinNetworkGame) return;
+  const status = document.querySelector("#network-join-status");
+  status.textContent = "Connecting...";
+  status.className = "network-status";
+  try {
+    const result = await window.QuantumFluxDesktop.joinNetworkGame({
+      address: document.querySelector("#network-address").value,
+      roomCode: document.querySelector("#network-join-code").value,
+      name: networkPlayerName()
+    });
+    networkState.mode = "shared-network";
+    networkState.role = "client";
+    networkState.connected = true;
+    networkState.peerId = result.peerId;
+    status.textContent = "Connected. Waiting for the host to start.";
+    status.className = "network-status connected";
+  } catch (error) {
+    status.textContent = error.message || "Connection failed.";
+    status.className = "network-status error";
+  }
+}
+
+function setNetworkJoinStatus(message, tone = "") {
+  const status = document.querySelector("#network-join-status");
+  if (!status) return;
+  status.textContent = message;
+  status.className = `network-status${tone ? ` ${tone}` : ""}`;
+}
+
+function renderNetworkLobbyPlayers() {
+  const names = [networkPlayerName(), ...networkState.peers.map((peer) => peer.name)];
+  document.querySelector("#network-player-total").textContent = `${names.length} / 4`;
+  document.querySelector("#network-player-list").innerHTML = names.map((name, index) => `<span>${index + 1}. ${escapeHtml(name)}</span>`).join("");
+  document.querySelector("#network-start-button").disabled = networkState.peers.length < 1;
+}
+
+function startNetworkGameAsHost() {
+  if (networkState.role !== "host" || networkState.peers.length < 1) return;
+  const networkPlayers = [
+    { name: networkPlayerName(), peerId: null },
+    ...networkState.peers.slice(0, 3)
+  ];
+  networkState.peerAssignments = {};
+  networkPlayers.slice(1).forEach((peer, index) => {
+    networkState.peerAssignments[peer.peerId] = playerDefaults[index + 1].id;
+  });
+  networkState.localPlayerId = "p1";
+  networkState.started = false;
+  startGameFromIntro({ networkPlayers, selectedGameMode: document.querySelector("#game-mode")?.value || "normal" });
+  networkState.started = true;
+  networkState.peers.forEach((peer) => {
+    window.QuantumFluxDesktop.sendNetworkMessage({
+      type: "game-start",
+      localPlayerId: networkState.peerAssignments[peer.peerId],
+      snapshot: createNetworkSnapshot()
+    }, peer.peerId);
+  });
+  updateNetworkGameStatus();
+}
+
+function createNetworkSnapshot() {
+  return JSON.parse(JSON.stringify({ players, gameState }));
+}
+
+function applyNetworkSnapshot(snapshot) {
+  if (!snapshot?.players || !snapshot?.gameState) return;
+  networkState.applyingSnapshot = true;
+  players = snapshot.players;
+  Object.assign(gameState, snapshot.gameState);
+  renderApp();
+  networkState.applyingSnapshot = false;
+  updateNetworkGameStatus();
+}
+
+function scheduleNetworkSnapshot() {
+  if (!networkState.started || networkState.applyingSnapshot || !window.QuantumFluxDesktop?.sendNetworkMessage) return;
+  clearTimeout(networkState.syncTimer);
+  networkState.syncTimer = setTimeout(() => {
+    const snapshot = createNetworkSnapshot();
+    if (networkState.role === "host") {
+      window.QuantumFluxDesktop.sendNetworkMessage({ type: "state", snapshot });
+    } else if (networkState.localPlayerId === gameState.activePlayerId) {
+      window.QuantumFluxDesktop.sendNetworkMessage({ type: "state-update", snapshot });
+    }
+  }, 35);
+}
+
+function handleNetworkEvent(event) {
+  if (event.type === "lobby-update" && networkState.role === "host") {
+    networkState.peers = event.peers || [];
+    renderNetworkLobbyPlayers();
+    return;
+  }
+  if (event.type === "peer-message" && networkState.role === "host") {
+    const message = event.message;
+    const assignedPlayerId = networkState.peerAssignments[event.peerId];
+    if (message?.type === "state-update" && assignedPlayerId && assignedPlayerId === gameState.activePlayerId) {
+      applyNetworkSnapshot(message.snapshot);
+      window.QuantumFluxDesktop.sendNetworkMessage({ type: "state", snapshot: createNetworkSnapshot() });
+    }
+    return;
+  }
+  if (event.type === "host-message" && networkState.role === "client") {
+    const message = event.message;
+    if (message?.type === "game-start") {
+      networkState.localPlayerId = message.localPlayerId;
+      networkState.started = true;
+      document.querySelector("#intro-screen").classList.add("hidden");
+      document.querySelector("#app-shell").classList.remove("hidden", "final-locked");
+      applyNetworkSnapshot(message.snapshot);
+    } else if (message?.type === "state") {
+      applyNetworkSnapshot(message.snapshot);
+    }
+    return;
+  }
+  if (event.type === "disconnected") {
+    networkState.connected = false;
+    setNetworkJoinStatus("Disconnected from host.", "error");
+    updateNetworkGameStatus();
+  }
+}
+
+function updateNetworkGameStatus() {
+  const badge = document.querySelector("#network-game-status");
+  if (!badge) return;
+  badge.classList.toggle("hidden", !networkState.started);
+  if (!networkState.started) return;
+  const local = playerById(networkState.localPlayerId);
+  badge.textContent = `LAN · ${local?.name || "Spectator"}${networkState.localPlayerId === gameState.activePlayerId ? " · YOUR TURN" : " · WAITING"}`;
+  document.body.classList.toggle("network-turn-locked", networkState.localPlayerId !== gameState.activePlayerId);
+}
+
+function guardNetworkClick(event) {
+  if (!networkState.started || networkState.localPlayerId === gameState.activePlayerId) return;
+  if (event.target.closest("#rulebook-button, #dice-library-button, #card-library-button, #music-button, #sfx-button, #app-exit-button, dialog")) return;
+  event.preventDefault();
+  event.stopPropagation();
+}
+
 function guardTutorialClick(event) {
   if (!gameState.tutorialMode || event.target.closest("#tutorial-coach")) return;
   const step = activeTutorialSteps()[gameState.tutorialStep];
@@ -4484,6 +4678,7 @@ function guardTutorialClick(event) {
 }
 
 function bindControls() {
+  document.body.addEventListener("click", guardNetworkClick, true);
   document.body.addEventListener("click", guardTutorialClick, true);
   document.body.addEventListener("click", (event) => {
     completeTutorialRequiredClick(event);
@@ -4491,9 +4686,15 @@ function bindControls() {
       playSound("button");
     }
   });
+  document.querySelector("#play-mode").addEventListener("change", renderPlayModeSetup);
+  document.querySelector("#network-role").addEventListener("change", renderNetworkRoleSetup);
+  document.querySelector("#network-create-button").addEventListener("click", createNetworkLobby);
+  document.querySelector("#network-join-button").addEventListener("click", joinNetworkLobby);
+  document.querySelector("#network-start-button").addEventListener("click", startNetworkGameAsHost);
   document.querySelector("#player-count").addEventListener("change", renderIntroPlayerFields);
   document.querySelector("#intro-form").addEventListener("submit", (event) => {
     event.preventDefault();
+    if (document.querySelector("#play-mode").value === "shared-network") return;
     startGameFromIntro();
   });
   document.querySelector("#tutorial-start-button").addEventListener("click", startTutorialFromIntro);
@@ -4697,8 +4898,8 @@ function renderIntroPlayerFields() {
 }
 
 function startGameFromIntro(options = {}) {
-  const count = options.tutorial ? 2 : Number(document.querySelector("#player-count").value);
-  const selectedGameMode = options.tutorial ? "normal" : document.querySelector("#game-mode")?.value || "normal";
+  const count = options.tutorial ? 2 : options.networkPlayers?.length || Number(document.querySelector("#player-count").value);
+  const selectedGameMode = options.tutorial ? "normal" : options.selectedGameMode || document.querySelector("#game-mode")?.value || "normal";
   const inputs = Array.from(document.querySelectorAll("#player-name-fields input[type='text']"));
   const rawStartPotential = Number(gameState.testStartPotential) || 0;
   const startPotential = Math.max(QP_TRACK_MIN, Math.min(QP_TRACK_MAX - (count - 1), rawStartPotential));
@@ -4706,14 +4907,14 @@ function startGameFromIntro(options = {}) {
   const tutorialNames = ["YOU!", "The Other Player"];
   players = playerDefaults.slice(0, count).map((player, index) => ({
     id: player.id,
-    name: options.tutorial ? tutorialNames[index] : inputs[index]?.value.trim() || player.name,
+    name: options.tutorial ? tutorialNames[index] : options.networkPlayers?.[index]?.name || inputs[index]?.value.trim() || player.name,
     color: player.color,
     potential: startPotential + index,
     trackPotential: startPotential + index,
     qubits: startQubits,
     instability: 0,
     apex: player.apex,
-    bot: options.tutorial ? false : Boolean(document.querySelector(`[data-bot-index="${index}"]`)?.checked)
+    bot: options.tutorial || options.networkPlayers ? false : Boolean(document.querySelector(`[data-bot-index="${index}"]`)?.checked)
   }));
   resetGameState();
   gameState.gameMode = selectedGameMode;
@@ -4723,7 +4924,7 @@ function startGameFromIntro(options = {}) {
   gameState.tutorialCollapseIndex = 0;
   gameState.tutorialPlacementIndex = 0;
   gameState.tutorialTurnStartId = players[0]?.id || null;
-  logAction(options.tutorial ? "Tutorial game started." : `${selectedGameMode === "flux" ? "Flux" : "Normal"} game started.`, { type: "global" });
+  logAction(options.tutorial ? "Tutorial game started." : `${selectedGameMode === "flux" ? "Flux" : "Normal"} ${options.networkPlayers ? "Shared Network" : "Shared Screen"} game started.`, { type: "global" });
   initializePlayerDice();
   configureTutorialDice();
   initializeDeckAndHands();
@@ -4739,11 +4940,31 @@ function startTutorialFromIntro() {
 
 function exitToIntro() {
   closeAllDialogs();
+  if (networkState.connected) window.QuantumFluxDesktop?.leaveNetworkGame?.();
+  clearTimeout(networkState.syncTimer);
+  Object.assign(networkState, {
+    mode: "shared-screen",
+    role: null,
+    connected: false,
+    started: false,
+    localPlayerId: null,
+    peerId: null,
+    hostInfo: null,
+    peers: [],
+    peerAssignments: {},
+    applyingSnapshot: false,
+    syncTimer: null
+  });
   resetTestSettings();
   resetGameState();
   document.querySelector("#app-shell").classList.add("hidden");
   document.querySelector("#app-shell").classList.remove("final-locked");
   document.querySelector("#intro-screen").classList.remove("hidden");
+  document.querySelector("#play-mode").value = "shared-screen";
+  document.querySelector("#network-host-details")?.classList.add("hidden");
+  document.querySelector("#network-join-status").textContent = "Enter the host address and room code.";
+  document.body.classList.remove("network-turn-locked");
+  renderPlayModeSetup();
   clearTutorialHighlight();
 }
 
@@ -7101,10 +7322,14 @@ function renderApp() {
   renderScoringDialog();
   renderTutorialCoach();
   renderActionLog();
+  updateNetworkGameStatus();
+  scheduleNetworkSnapshot();
   scheduleBotTurn();
 }
 
 renderIntroPlayerFields();
 bindControls();
+renderPlayModeSetup();
 updateAudioButtons();
+if (window.QuantumFluxDesktop?.onNetworkEvent) window.QuantumFluxDesktop.onNetworkEvent(handleNetworkEvent);
 if (window.QuantumFluxDesktop) document.body.classList.add("desktop-app");
